@@ -1,16 +1,8 @@
-// server.js
-
+require("dotenv").config({ path: __dirname + "/.env", override: true });
+const { generateExperienceWithAI } = require("./ai");
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const { users } = require("./data/users");
-const {
-  generateChallenge,
-  generateNarrative,
-  generateReward
-} = require("./ai");
-
-dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -18,17 +10,34 @@ app.use(express.json());
 
 const PORT = 5001;
 
-// Health check
+// -------------------------------
+// Confirm OpenAI Key is Loaded
+// -------------------------------
+if (process.env.OPENAI_API_KEY) {
+  console.log("🔐 OpenAI API Key Loaded: YES");
+  console.log("Key Prefix:", process.env.OPENAI_API_KEY.slice(0, 4) + "...");
+} else {
+  console.log("❌ OpenAI API Key Loaded: NO");
+  console.log("Please set OPENAI_API_KEY in your .env file.");
+}
+
+// -------------------------------
+// Health Check
+// -------------------------------
 app.get("/", (req, res) => {
   res.json({ status: "ok", service: "coffee-quest-backend" });
 });
 
-// Get available sample users
+// -------------------------------
+// Get All Sample Users
+// -------------------------------
 app.get("/api/users", (req, res) => {
   res.json(users);
 });
 
-// Generate personalised experience for a given user
+// -------------------------------
+// Generate AI-Personalized Experience
+// -------------------------------
 app.post("/api/experience", async (req, res) => {
   try {
     const { userId } = req.body;
@@ -38,36 +47,34 @@ app.post("/api/experience", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Rule-based personalization (MVP)
-    const narrative = generateNarrative(user);
-    const challenge = generateChallenge(user);
-    const reward = generateReward(user);
+    console.log(`Generating AI experience for user: ${user.name}`);
 
-    // Simulated progression
-    const progress = {
-      level: user.loyalty.level,
-      points: user.loyalty.points + challenge.bonusPoints,
-      streakDays: user.loyalty.streakDays + 1
-    };
+    const aiResult = await generateExperienceWithAI(user);
 
     res.json({
       user: {
         id: user.id,
         name: user.name,
         segment: user.segment,
-        city: user.city
+        city: user.city,
       },
-      narrative,
-      challenge,
-      reward,
-      progress
+      narrative: aiResult.narrative,
+      challenge: aiResult.challenge,
+      reward: aiResult.reward,
+      progress: aiResult.progress,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Something went wrong" });
+    console.error("AI Generation Error:", err);
+    res.status(500).json({
+      error: "AI generation failed. Check server logs and API key.",
+    });
   }
 });
 
+
+// -------------------------------
+// Start Server
+// -------------------------------
 app.listen(PORT, () => {
-  console.log(`Coffee Quest backend running on http://localhost:${PORT}`);
+  console.log(`🚀 Coffee Quest backend running at http://localhost:${PORT}`);
 });
