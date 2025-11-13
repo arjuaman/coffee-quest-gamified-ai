@@ -1,33 +1,37 @@
-// ai.js - Chat Completions based AI logic
+// ai.js - Chat Completions based AI logic (with campaign goal)
 
 const client = require("./openaiClient");
 
-// Cheap, strong, and available model
 const MODEL_NAME = "gpt-4.1-mini";
 
 /**
- * Generate a full gamified experience for a given user using the LLM.
- * Returns: { narrative, challenge, reward, progress }
+ * Generate a full gamified experience for a given user and campaign goal.
+ * @param {object} user - user profile object
+ * @param {string} campaignGoal - e.g. "increase-order-value", "boost-social-shares"
  */
-async function generateExperienceWithAI(user) {
+async function generateExperienceWithAI(user, campaignGoal) {
   const systemMessage = `
 You are the AI game designer for "Coffee Quest", a gamified loyalty experience
 for a premium Indian coffee subscription brand (like Blue Tokai / Third Wave, etc.).
 
-Rules:
-- Market: India.
-- Tone: playful, warm, premium, a bit coffee-nerdy but approachable.
-- Theme: coffee journeys, roastery realms, brew mastery, streaks, points.
-- Make everything feel like it's part of an Indian urban coffee culture.
+Market:
+- India (urban coffee culture, metros, students, young professionals).
 
-The app is generating a personalised DAILY QUEST for one user.
-You must respond in VALID JSON ONLY (no extra commentary).
+Tone:
+- Playful, warm, premium, a bit coffee-nerdy but approachable.
 
-Use the user JSON and their behaviour / preferences to:
-- Craft a short narrative (2–4 sentences).
-- Create a challenge that drives brand actions (view products, add to cart, checkout, share, quiz, etc.).
-- Create a reward aligned with rewardPreference when possible.
-- Slightly advance their progression (points, streak).
+Theme:
+- Coffee journeys, roastery realms, brew mastery, streaks, points.
+
+You design a DAILY QUEST that should also optimise for a marketing goal
+(campaignGoal) such as:
+- "increase-order-value" (nudging user to add more / higher-value items)
+- "boost-social-shares" (encourage sharing / UGC)
+- "drive-new-product-trial" (get them to try something new)
+- "reactivate-lapsed-user" (if they've been inactive)
+- "collect-preferences" (encourage quizzes / profile completion)
+
+You MUST respond in VALID JSON ONLY (no extra commentary, no markdown).
 
 Your response MUST be a JSON object with EXACTLY this shape:
 
@@ -56,19 +60,29 @@ Your response MUST be a JSON object with EXACTLY this shape:
 `;
 
   const userMessage = `
-Here is the user profile and behaviour JSON:
+Here is the user profile JSON:
 
 ${JSON.stringify(user, null, 2)}
 
-Generate a single personalised DAILY quest for THIS user only.
-Remember: respond with JSON ONLY (no markdown, no explanation, no extra keys).
+Here is the campaign goal for this quest:
+${campaignGoal || "increase-order-value"}
+
+Use:
+- The user profile (demographics, preferences, behaviour, loyalty)
+- The campaign goal
+
+to design a DAILY quest that feels:
+- Highly personalised
+- Aligned with Indian coffee culture
+- Aligned with the given marketing goal
+
+Respond with JSON ONLY, matching the required shape exactly.
 `;
 
-  // Call Chat Completions with JSON response enforced
   const completion = await client.chat.completions.create({
     model: MODEL_NAME,
     temperature: 0.9,
-    response_format: { type: "json_object" }, // ensures valid JSON
+    response_format: { type: "json_object" },
     messages: [
       { role: "system", content: systemMessage },
       { role: "user", content: userMessage },
@@ -89,7 +103,6 @@ Remember: respond with JSON ONLY (no markdown, no explanation, no extra keys).
     throw new Error("AI response could not be parsed as JSON.");
   }
 
-  // Basic sanity checks so frontend doesn't crash
   if (
     !parsed.narrative ||
     !parsed.challenge ||

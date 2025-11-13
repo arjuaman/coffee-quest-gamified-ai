@@ -71,6 +71,43 @@ app.post("/api/experience", async (req, res) => {
   }
 });
 
+// NEW: fully custom experience using user input from frontend
+app.post("/api/experience/custom", async (req, res) => {
+  try {
+    const { user, goal } = req.body;
+
+    if (!user || !user.name) {
+      return res.status(400).json({ error: "User profile is required." });
+    }
+
+    console.log(
+      `Generating custom AI experience for user: ${user.name}, goal: ${goal}`
+    );
+
+    const aiResult = await generateExperienceWithAI(
+      user,
+      goal || "increase-order-value"
+    );
+
+    res.json({
+      user: {
+        id: user.id || null,
+        name: user.name,
+        segment: user.segment,
+        city: user.city,
+      },
+      narrative: aiResult.narrative,
+      challenge: aiResult.challenge,
+      reward: aiResult.reward,
+      progress: aiResult.progress,
+    });
+  } catch (err) {
+    console.error("Custom AI Generation Error:", err);
+    res.status(500).json({
+      error: "AI generation failed for custom user. Check logs.",
+    });
+  }
+});
 
 // -------------------------------
 // Start Server
