@@ -255,8 +255,3 @@ module.exports = {
   generateExperienceWithAI,
   generateChannelAssets
 };
-
-
-module.exports = {
-  generateExperienceWithAI
-};

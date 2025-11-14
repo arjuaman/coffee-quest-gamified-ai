@@ -124,21 +124,82 @@ app.post("/api/experience/custom", async (req, res) => {
 
 // Turn a single experience into channel-ready assets (email, push, in-app, reward config)
 app.post("/api/experience/channel-assets", async (req, res) => {
+  const { experience } = req.body;
+
+  if (!experience || !experience.challenge || !experience.reward) {
+    return res
+      .status(400)
+      .json({ error: "Experience with challenge and reward is required." });
+  }
+
+  // Helper: deterministic fallback if AI fails
+  function buildFallbackChannelAssets(exp) {
+    const userName = exp.userName || "your subscriber";
+    const challengeTitle = exp.challenge?.title || "Today’s Coffee Quest";
+    const rewardLabel = exp.reward?.label || "a personalised coffee perk";
+    const rewardConditions =
+      exp.reward?.conditions || "Valid for a limited time on eligible items.";
+
+    return {
+      email: {
+        subject: `Your Coffee Quest: ${challengeTitle}`,
+        previewText: `Complete today’s quest to unlock ${rewardLabel}.`,
+        bodyText: `Hi ${userName},
+
+Your personalised Coffee Quest is live:
+
+• Challenge: ${challengeTitle}
+• Reward: ${rewardLabel}
+
+Open the app or site, follow the quest instructions, and complete it before the reward expires.
+
+${rewardConditions}
+
+Happy brewing,
+The Coffee Quest Team`
+      },
+      push: {
+        title: `Coffee Quest: ${challengeTitle}`,
+        body: `Complete your quest today and unlock ${rewardLabel}.`
+      },
+      inApp: {
+        heading: challengeTitle,
+        body: `Finish this quest today to unlock ${rewardLabel}. ${rewardConditions}`,
+        ctaLabel: "View quest"
+      },
+      rewardConfig: {
+        internalName: `quest-${Date.now()}`,
+        type: exp.reward?.type || "discount",
+        value: rewardLabel,
+        conditions: rewardConditions,
+        expiryDays: 7
+      }
+    };
+  }
+
   try {
-    const { experience } = req.body;
-    if (!experience || !experience.challenge || !experience.reward) {
-      return res
-        .status(400)
-        .json({ error: "Experience with challenge and reward is required." });
+    // Try AI-powered generation first
+    try {
+      const assets = await generateChannelAssets(experience);
+      return res.json(assets);
+    } catch (aiErr) {
+      console.error("AI channel assets error, falling back:", aiErr);
+      // fall through to fallback below
     }
 
-    const assets = await generateChannelAssets(experience);
-    res.json(assets);
+    // If AI fails for any reason, we still return something useful
+    const fallback = buildFallbackChannelAssets(experience);
+    return res.json(fallback);
   } catch (err) {
-    console.error("Channel assets error:", err);
-    res.status(500).json({ error: "Failed to generate channel assets." });
+    console.error("Channel assets route error:", err);
+    return res.status(500).json({
+      error:
+        err.message ||
+        "Unexpected error when generating channel assets on the server."
+    });
   }
 });
+
 
 
 // Generate AI experiences for multiple users (batch simulation)
