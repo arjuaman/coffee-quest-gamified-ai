@@ -33,6 +33,16 @@ BRAND CONFIG:
 
 Reward pool examples (you may reference or echo their spirit, but you don't have to copy exactly):
 ${JSON.stringify(cfg.rewardPool || [], null, 2)}
+When choosing a reward:
+- Prefer a mix of reward types over time (not always discounts).
+- Align the reward type with the campaignGoal:
+  - increase-order-value → cart boosters, add-on discounts, free shipping.
+  - drive-new-product-trial → single-origin promos, samplers, early access.
+  - boost-social-shares → badges, UGC-based bonuses, refer-a-friend perks.
+  - reactivate-lapsed-user → comeback boosts, welcome-back discounts.
+  - collect-preferences → content rewards, guides, brew-alongs, badges.
+- Feel free to create new on-brand reward labels based on these patterns.
+
 
 Guardrails (must follow):
 ${cfg.guardrails}
