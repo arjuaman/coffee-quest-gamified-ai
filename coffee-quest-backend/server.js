@@ -3,6 +3,8 @@ const { generateExperienceWithAI } = require("./ai");
 const express = require("express");
 const cors = require("cors");
 const { users } = require("./data/users");
+const { brandConfig, saveBrandConfigToFile } = require("./brandConfig");
+
 
 const app = express();
 app.use(cors());
@@ -108,6 +110,24 @@ app.post("/api/experience/custom", async (req, res) => {
     });
   }
 });
+
+// Get current brand config
+app.get("/api/brand-config", (req, res) => {
+  res.json(brandConfig);
+});
+
+// Update brand config (partial update)
+app.put("/api/brand-config", (req, res) => {
+  try {
+    const newConfig = req.body || {};
+    saveBrandConfigToFile(newConfig);
+    res.json(brandConfig);
+  } catch (err) {
+    console.error("Brand config update error:", err.message);
+    res.status(500).json({ error: "Failed to update brand config." });
+  }
+});
+
 
 // -------------------------------
 // Start Server

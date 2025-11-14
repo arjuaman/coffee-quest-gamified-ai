@@ -1,0 +1,36 @@
+{
+  "brandName": "Roastery Realm Coffee",
+  "market": "Urban Indian coffee drinkers in metros like Bengaluru, Mumbai, Delhi, Pune",
+  "tone": "playful, warm, premium, coffee-nerdy but approachable",
+  "theme": "coffee journeys, roastery realms, brew mastery, streaks, points",
+  "defaultCampaignGoal": "increase-order-value",
+  "primaryObjectives": [
+    "increase-order-value",
+    "drive-new-product-trial",
+    "boost-social-shares"
+  ],
+  "rewardPool": [
+    {
+      "id": "discount10",
+      "type": "discount",
+      "label": "10% off any coffee bag",
+      "description": "Gentle nudge to add one more bag to the cart.",
+      "conditions": "Valid on coffee beans only, for 3 days."
+    },
+    {
+      "id": "guide-pourover",
+      "type": "exclusive-content",
+      "label": "Pour-over Mastery Mini Guide",
+      "description": "Short, practical video + steps for perfect pour-over.",
+      "conditions": "Unlocked after completing a discovery challenge."
+    },
+    {
+      "id": "early-single-origin",
+      "type": "early-access",
+      "label": "Early access to next single-origin drop",
+      "description": "Reserve a limited micro-lot before it goes public.",
+      "conditions": "Limited quantity, 48-hour early window."
+    }
+  ],
+  "guardrails": "Avoid manipulative language. Do not guilt-trip the user. Stay respectful, friendly, and transparent about rewards and conditions."
+}

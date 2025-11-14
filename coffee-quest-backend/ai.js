@@ -1,35 +1,49 @@
-// ai.js - Chat Completions based AI logic (with campaign goal)
+// ai.js - Chat Completions based AI logic (with campaign goal + brand config)
 
 const client = require("./openaiClient");
+const { brandConfig } = require("./brandConfig");
 
 const MODEL_NAME = "gpt-4.1-mini";
 
 /**
- * Generate a full gamified experience for a given user and campaign goal.
+ * Generate a full gamified experience for a given user and campaign goal,
+ * informed by the current brandConfig.
+ *
  * @param {object} user - user profile object
- * @param {string} campaignGoal - e.g. "increase-order-value", "boost-social-shares"
+ * @param {string} campaignGoal - e.g. "increase-order-value"
+ * @param {object} overrideBrandConfig - optional brandConfig override (usually not needed)
  */
-async function generateExperienceWithAI(user, campaignGoal) {
+async function generateExperienceWithAI(
+  user,
+  campaignGoal,
+  overrideBrandConfig
+) {
+  const cfg = overrideBrandConfig || brandConfig;
+
   const systemMessage = `
 You are the AI game designer for "Coffee Quest", a gamified loyalty experience
-for a premium Indian coffee subscription brand (like Blue Tokai / Third Wave, etc.).
+for a premium Indian coffee subscription brand.
 
-Market:
-- India (urban coffee culture, metros, students, young professionals).
+BRAND CONFIG:
+- Brand name: ${cfg.brandName}
+- Market: ${cfg.market}
+- Tone: ${cfg.tone}
+- Theme: ${cfg.theme}
+- Primary objectives: ${(cfg.primaryObjectives || []).join(", ")}
 
-Tone:
-- Playful, warm, premium, a bit coffee-nerdy but approachable.
+Reward pool examples (you may reference or echo their spirit, but you don't have to copy exactly):
+${JSON.stringify(cfg.rewardPool || [], null, 2)}
 
-Theme:
-- Coffee journeys, roastery realms, brew mastery, streaks, points.
+Guardrails (must follow):
+${cfg.guardrails}
 
-You design a DAILY QUEST that should also optimise for a marketing goal
-(campaignGoal) such as:
-- "increase-order-value" (nudging user to add more / higher-value items)
-- "boost-social-shares" (encourage sharing / UGC)
-- "drive-new-product-trial" (get them to try something new)
-- "reactivate-lapsed-user" (if they've been inactive)
-- "collect-preferences" (encourage quizzes / profile completion)
+You design a DAILY QUEST that should optimise for a marketing goal (campaignGoal)
+such as:
+- "increase-order-value"
+- "boost-social-shares"
+- "drive-new-product-trial"
+- "reactivate-lapsed-user"
+- "collect-preferences"
 
 You MUST respond in VALID JSON ONLY (no extra commentary, no markdown).
 
@@ -65,16 +79,18 @@ Here is the user profile JSON:
 ${JSON.stringify(user, null, 2)}
 
 Here is the campaign goal for this quest:
-${campaignGoal || "increase-order-value"}
+${campaignGoal || cfg.defaultCampaignGoal || "increase-order-value"}
 
 Use:
 - The user profile (demographics, preferences, behaviour, loyalty)
 - The campaign goal
+- The brandConfig (tone, theme, objectives, guardrails, reward pool)
 
 to design a DAILY quest that feels:
-- Highly personalised
-- Aligned with Indian coffee culture
+- Highly personalised for THIS user
+- On-brand for ${cfg.brandName}
 - Aligned with the given marketing goal
+- Ethically respectful (no manipulation, no guilt-tripping)
 
 Respond with JSON ONLY, matching the required shape exactly.
 `;
@@ -85,8 +101,8 @@ Respond with JSON ONLY, matching the required shape exactly.
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: systemMessage },
-      { role: "user", content: userMessage },
-    ],
+      { role: "user", content: userMessage }
+    ]
   });
 
   const text = completion.choices?.[0]?.message?.content;
@@ -117,5 +133,5 @@ Respond with JSON ONLY, matching the required shape exactly.
 }
 
 module.exports = {
-  generateExperienceWithAI,
+  generateExperienceWithAI
 };
