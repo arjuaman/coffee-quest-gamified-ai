@@ -111,6 +111,63 @@ app.post("/api/experience/custom", async (req, res) => {
   }
 });
 
+// Generate AI experiences for multiple users (batch simulation)
+app.post("/api/experience/batch", async (req, res) => {
+  try {
+    const { users: batchUsers, goal } = req.body;
+
+    if (!Array.isArray(batchUsers) || batchUsers.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Please provide a non-empty 'users' array." });
+    }
+
+    console.log(
+      `Running batch simulation for ${batchUsers.length} users, goal: ${goal}`
+    );
+
+    // Run sequentially to be gentle on the API and easier to debug
+    const results = [];
+    for (const user of batchUsers) {
+      try {
+        const aiResult = await generateExperienceWithAI(
+          user,
+          goal || "increase-order-value"
+        );
+        results.push({
+          success: true,
+          user: {
+            name: user.name,
+            city: user.city,
+            segment: user.segment
+          },
+          narrative: aiResult.narrative,
+          challenge: aiResult.challenge,
+          reward: aiResult.reward,
+          progress: aiResult.progress
+        });
+      } catch (err) {
+        console.error(`Batch AI error for user ${user.name}:`, err.message);
+        results.push({
+          success: false,
+          user: {
+            name: user.name,
+            city: user.city,
+            segment: user.segment
+          },
+          error: "AI generation failed for this user."
+        });
+      }
+    }
+
+    res.json({ results });
+  } catch (err) {
+    console.error("Batch generation error:", err);
+    res.status(500).json({ error: "Batch AI generation failed." });
+  }
+});
+
+
 // Get current brand config
 app.get("/api/brand-config", (req, res) => {
   res.json(brandConfig);
