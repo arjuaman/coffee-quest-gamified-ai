@@ -1,5 +1,6 @@
 require("dotenv").config({ path: __dirname + "/.env", override: true });
-const { generateExperienceWithAI } = require("./ai");
+const { generateExperienceWithAI, generateChannelAssets } = require("./ai");
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const { users } = require("./data/users");
@@ -10,7 +11,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = 5001;
+const PORT = 5001 || process.env.PORT;
+
+// Serve React build (static files)
+const frontendBuildPath = path.join(
+  __dirname,
+  "..",
+  "coffee-quest-frontend",
+  "build"
+);
+
+app.use(express.static(frontendBuildPath));
 
 // -------------------------------
 // Confirm OpenAI Key is Loaded
@@ -111,6 +122,25 @@ app.post("/api/experience/custom", async (req, res) => {
   }
 });
 
+// Turn a single experience into channel-ready assets (email, push, in-app, reward config)
+app.post("/api/experience/channel-assets", async (req, res) => {
+  try {
+    const { experience } = req.body;
+    if (!experience || !experience.challenge || !experience.reward) {
+      return res
+        .status(400)
+        .json({ error: "Experience with challenge and reward is required." });
+    }
+
+    const assets = await generateChannelAssets(experience);
+    res.json(assets);
+  } catch (err) {
+    console.error("Channel assets error:", err);
+    res.status(500).json({ error: "Failed to generate channel assets." });
+  }
+});
+
+
 // Generate AI experiences for multiple users (batch simulation)
 app.post("/api/experience/batch", async (req, res) => {
   try {
@@ -183,6 +213,11 @@ app.put("/api/brand-config", (req, res) => {
     console.error("Brand config update error:", err.message);
     res.status(500).json({ error: "Failed to update brand config." });
   }
+});
+
+// Fallback: serve index.html for any unknown route (SPA)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendBuildPath, "index.html"));
 });
 
 
