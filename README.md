@@ -1,231 +1,153 @@
-# ☕ Coffee Quest — GenAI-Powered Gamified Loyalty MVP
+# ☕ Coffee Quest — AI-Powered Gamified Marketing Engine  
+**Personalized, dynamic, gamified marketing campaigns… powered by GenAI.**
 
-**Coffee Quest** is a fully working MVP of a **gamified, AI-personalized loyalty experience** built for a **Premium Coffee Subscription Brand** in India.
-It features a **React frontend**, a **Node.js/Express backend**, and a modular “AI-ready” engine for generating personalized narratives, challenges, and rewards.
+Coffee Quest is a full-stack prototype demonstrating how brands can deliver *hyper-personalized*, *gamified*, and *AI-generated* daily experiences to customers.  
+The system dynamically generates **quests**, **narratives**, **rewards**, and **channel-ready marketing content** using OpenAI models — all wrapped in a modern, interactive UI.
 
-This project demonstrates how brands can use **GenAI + gamification** to deepen engagement, grow loyalty, and increase conversions.
+This project is built for:
+- Product & growth teams exploring AI-driven personalization  
+- Marketers and loyalty teams designing gamified experiences  
+- Developers evaluating how to integrate LLMs into real-time user journeys  
+- Innovators exploring the future of CRM, loyalty, and lifecycle marketing  
 
 ---
 
 ## 🚀 Features
 
-### ✅ **Frontend (React)**
+### 🎮 **AI-Generated Gamified Experiences**
+- Generates a unique daily quest for any user.
+- Includes narrative, challenge, reward, and progression.
+- Dynamically adapts based on profile, preferences, behavior.
 
-* Beautiful dark roasted UI
-* Persona selection
-* “Generate Today’s Coffee Quest” button
-* Displays:
+### 🧠 **Brand Config Engine**
+A full CMS-style panel where marketers define:
+- Brand tone  
+- Campaign objectives  
+- Reward pool  
+- Behavioral guardrails  
+- Narrative theme  
 
-  * Personalized **Narrative**
-  * Personalized **Challenge**
-  * Personalized **Reward**
-  * Dynamic **Progress Update**
-* Fully responsive
-* Styled for premium-brand aesthetics (coffee-themed gradients + soft shadows)
+The AI then generates personalized quests fully aligned with brand identity.
 
-### ✅ **Backend (Node.js + Express)**
+### 📬 **Channel Content Generator**
+Transforms a quest into:
+- Email subject + body  
+- Push notification title + message  
+- In-app banner headline + CTA  
+- Reward configuration metadata  
 
-* `/api/users`: Simulated user profiles
-* `/api/experience`: Generates:
-
-  * Coffee-themed narrative
-  * Daily challenge
-  * Personalized reward
-  * Updated user progression
-* AI logic built modularly (`ai.js`) with dedicated LLM hook points
-* CORS enabled
-
-### ✅ **AI-Ready Architecture**
-
-Works out-of-the-box using rule-based personalization, but includes clean, commented integration points for:
-
-* OpenAI / Anthropic models
-* Local LLMs
-* RAG-based personalization
-* Embedding-based similarity lookups
+### 🔄 **Simulation Lab**
+Upload a CSV of users to:
+- Generate quests in batch  
+- Preview segment-level differences  
+- Test campaign goals across cohorts  
 
 ---
 
-## 🧱 Project Structure
+## 🧱 Architecture Overview
 
-```
-.
-├── coffee-quest-backend/        # Express server + AI logic
-│   ├── server.js
-│   ├── ai.js
-│   └── data/
-│       └── users.js
-│
-└── coffee-quest-frontend/       # React frontend UI
-    ├── src/
-    │   ├── App.js
-    │   ├── styles.css
-    │   └── index.js
-    └── public/
-```
+Coffee Quest is a single Render-hosted web service:
+
+Frontend (React SPA)
+↓ served by
+Backend (Node + Express)
+↓ calls
+OpenAI API (LLM generation)
+
+
+### Frontend (React)
+- Single-page application  
+- Hero section with dynamic “Today’s Quest”  
+- Experience Builder  
+- Brand Config panel  
+- Simulation Lab  
+- Channel Content output cards  
+
+### Backend (Express)
+- `/api/experience/custom`  
+- `/api/experience/batch`  
+- `/api/experience/channel-assets`  
+- `/api/brand-config` (GET/PUT)  
+- OpenAI completion logic with JSON-safe parsing  
 
 ---
 
 ## 🛠️ Tech Stack
-
-### **Frontend**
-
-* React (CRA)
-* CSS (custom, premium dark theme)
-* Fetch API
-
-### **Backend**
-
-* Node.js
-* Express
-* CORS
-* dotenv (optional for LLM keys)
-
-### **AI Layer**
-
-* Currently rule-based
-* LLM integration placeholders included
+- **Frontend:** React, TailwindCSS, CSV parser  
+- **Backend:** Node.js, Express  
+- **AI:** OpenAI `gpt-4.1-mini`  
+- **Hosting:** Render Web Service  
+- **Storage:** JSON persistence (brand config)  
 
 ---
 
-## 🔧 Setup Instructions
+## 📦 Project Structure
 
-### 1. Clone the repository
+coffee-quest/
+│
+├── coffee-quest-frontend/
+│ ├── src/
+│ ├── public/
+│ └── build/ (auto-generated)
+│
+└── coffee-quest-backend/
+├── server.js
+├── ai.js
+├── brandConfig.js
+├── brandConfig.json
+├── openaiClient.js
+├── data/
+└── .env (local only)
 
-```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-cd YOUR_REPO_NAME
-```
-
----
-
-## 2. Install & Run Backend
-
-```bash
-cd coffee-quest-backend
-npm install
-npm start
-```
-
-Backend runs on:
-
-```
-http://localhost:5001
-```
-
-Test it directly:
-
-```
-http://localhost:5001/api/users
-```
-
-You should see a list of sample users.
 
 ---
 
-## 3. Install & Run Frontend
+## ⚙️ Local Development Setup
 
-In another terminal:
+### 1. Clone the repo
+bash
+git clone https://github.com/<yourname>/coffee-quest.git
+cd coffee-quest
 
-```bash
+### 2. Setup the frontend
 cd coffee-quest-frontend
 npm install
 npm start
-```
 
-Frontend runs on:
+### 3. Setup the backend
+cd ../coffee-quest-backend
+npm install
 
-```
-http://localhost:3000
-```
+Create .env:
+OPENAI_API_KEY=your_key_here
+PORT=5001
 
----
+Start backend:
+npm start
 
-# 🎮 Using the App
+Visit:
+👉 http://localhost:3000
+ (dev)
+👉 http://localhost:5001
+ (prod-style)
 
-1. Open the frontend in your browser
-2. Choose a persona (Aarav, Isha, Vikram)
-3. Click **Generate Today’s Coffee Quest**
-4. Watch:
+## 🚀 Deploying to Render
 
-   * A personalized **story snippet**
-   * A personalized **challenge**
-   * A tailored **reward**
-   * Updated **experience progression**
+### Build Command
+cd coffee-quest-frontend && npm install && npm run build && cd ../coffee-quest-backend && npm install
 
-Feels like a premium Indian coffee brand with AI superpowers.
+### Start Command
+cd coffee-quest-backend && npm start
 
----
+Add environment variables on Render:
+OPENAI_API_KEY=sk-...
+NODE_ENV=production
 
-# 🤖 LLM Integration (Optional)
+## 🌱 Future Enhancements
 
-Inside `coffee-quest-backend/ai.js` you will find:
-
-```js
-// TODO: plug LLM here
-```
-
-You can integrate:
-
-```js
-const OpenAI = require("openai");
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-```
-
-And replace any generator with:
-
-```js
-const response = await client.chat.completions.create({
-  model: "gpt-4.1",
-  messages: [{ role: "user", content: prompt }],
-});
-```
-
-Return:
-
-```js
-response.choices[0].message.content
-```
-
-Strip or parse as needed.
-
----
-
-# 🌟 Roadmap
-
-### 🔜 Short-Term
-
-* [ ] Persistent user progress (SQLite or PostgreSQL)
-* [ ] Daily missions and streak system
-* [ ] Reward wallet & claim system
-* [ ] Coffee quiz inside frontend
-
-### 🤖 Medium-Term (AI)
-
-* [ ] Full LLM-generated narratives & challenges
-* [ ] Coffee preference embeddings
-* [ ] RAG retrieval of brand product data
-* [ ] Personalized discount code system
-
-### 🔥 Long-Term Vision
-
-* AR-based coffee tasting
-* Brew-along guided sessions
-* Multi-player “brew battles”
-* Integration with IoT smart brewers
-* Mobile app (React Native)
-
----
-
-# 📸 Screenshots (To be added later)
-
-
-
----
-
-# 🛡️ License
-
-MIT — free to use, modify, fork.
-
----
-
+Multi-day narrative arcs
+Automated cohort insights
+A/B testing for challenge difficulty
+Integrations: Klaviyo, MoEngage, Braze
+Full loyalty engine (badges, XP store, levels)
+Marketplace for brand modules (e.g., Fitness Quest, Finance Quest)
