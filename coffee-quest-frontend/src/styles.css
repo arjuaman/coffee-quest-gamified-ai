@@ -283,6 +283,7 @@ body {
 }
 
 .hero-card-body p {
+  color: black;
   margin: 0;
   font-size: 15px;
   line-height: 1.6;
