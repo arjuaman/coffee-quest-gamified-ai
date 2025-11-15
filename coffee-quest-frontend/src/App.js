@@ -1157,7 +1157,7 @@ async function handleGenerateChannelAssets() {
         </main>
 
         <footer className="app-footer">
-          <span>Prototype · Coffee Quest · AI-generated gamified campaigns</span>
+          <span>© {new Date().getFullYear()} Developed by ARJU AMAN · p24arju@iima.ac.in · Prototype · Coffee Quest · AI-generated gamified campaigns</span>
         </footer>
       </div>
     </div>
